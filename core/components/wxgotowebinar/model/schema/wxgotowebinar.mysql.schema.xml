@@ -5,9 +5,9 @@
         <field key="registrantkey" dbtype="varchar" precision="100" phptype="string" null="false" default="" />
         <field key="status" dbtype="varchar" precision="255" phptype="string" null="false" default=""/>
         <field key="joinurl" dbtype="varchar" precision="255" phptype="string" null="false" default=""/>
-		<field key="attendancetimeinseconds" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
-		<field key="wxgtwsession" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
-		<field key="wxregistration" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
+        <field key="attendancetimeinseconds" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
+        <field key="wxgtwsession" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
+        <field key="wxregistration" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
         <aggregate alias="Session" class="wxGtwSession" local="wxgtwsession" foreign="id" cardinality="one" owner="foreign"/>
         <aggregate alias="Registration" class="wxRegistration" local="wxregistration" foreign="id" cardinality="one" owner="foreign"/>
         <composite alias="Question" class="wxGtwQuestion" local="id" foreign="wxgtwregistrant" cardinality="many" owner="local" />
@@ -24,8 +24,8 @@
     </object>
     
     <object class="wxGtwQuestion" table="wx_gtw_question" extends="xPDOSimpleObject">
-    	<field key="question" dbtype="text" phptype="string" null="false" default=""/>
-		<field key="wxgtwregistrant" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
+        <field key="question" dbtype="text" phptype="string" null="false" default=""/>
+        <field key="wxgtwregistrant" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
         <aggregate alias="Registrant" class="wxGtwRegistrant" local="wxgtwregistrant" foreign="id" cardinality="one" owner="foreign"/>
         <composite alias="Answer" class="wxGtwAnswer" local="id" foreign="wxgtquestion" cardinality="many" owner="local" />
         <index alias="wxgtwregistrant" name="wxgtwregistrant" primary="false" unique="false" type="BTREE">
@@ -34,9 +34,9 @@
     </object>
     
     <object class="wxGtwAnswer" table="wx_gtw_question" extends="xPDOSimpleObject">
-    	<field key="answer" dbtype="text" phptype="string" null="false" default=""/>
-		<field key="answeredBy" dbtype="varchar" precision="255" phptype="string" null="false" default=""/>
-		<field key="wxgtquestion" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
+        <field key="answer" dbtype="text" phptype="string" null="false" default=""/>
+        <field key="answeredBy" dbtype="varchar" precision="255" phptype="string" null="false" default=""/>
+        <field key="wxgtquestion" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
         <aggregate alias="Question" class="wxGtwQuestion" local="wxgtquestion" foreign="id" cardinality="one" owner="foreign"/>
         <index alias="wxgtquestion" name="wxgtquestion" primary="false" unique="false" type="BTREE">
             <column key="wxgtquestion" length="" collation="A" null="false" />
@@ -44,19 +44,19 @@
     </object>
     
     <object class="wxGtwSurveyQuestion" table="wx_gtw_surveyanswer" extends="xPDOSimpleObject">
-	    <field key="question" dbtype="text" phptype="string" null="false" default=""/>
-		<field key="wxgtwsession" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
+        <field key="question" dbtype="text" phptype="string" null="false" default=""/>
+        <field key="wxgtwsession" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
         <aggregate alias="Session" class="wxGtwSession" local="wxgtwsession" foreign="id" cardinality="one" owner="foreign"/>
         <composite alias="Answer" class="wxGtwSurveyAnswer" local="id" foreign="wxgtwsurveyquestion" cardinality="many" owner="local" />
         <index alias="wxgtwsession" name="wxgtwsession" primary="false" unique="false" type="BTREE">
             <column key="wxgtwsession" length="" collation="A" null="false" />
         </index>
-	</object>
+    </object>
     
     <object class="wxGtwSurveyAnswer" table="wx_gtw_surveyanswer" extends="xPDOSimpleObject">
-		<field key="answer" dbtype="text" phptype="string" null="false" default=""/>
-		<field key="wxgtwsurveyquestion" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
-		<field key="wxgtwregistrant" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
+        <field key="answer" dbtype="text" phptype="string" null="false" default=""/>
+        <field key="wxgtwsurveyquestion" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
+        <field key="wxgtwregistrant" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
         <aggregate alias="Registrant" class="wxGtwRegistrant" local="wxgtwregistrant" foreign="id" cardinality="one" owner="foreign"/>
         <aggregate alias="Question" class="wxGtwSurveyQuestion" local="wxgtwsurveyquestion" foreign="id" cardinality="one" owner="foreign"/>
         <index alias="wxgtwsurveyquestion" name="wxgtwsurveyquestion" primary="false" unique="false" type="BTREE">
@@ -68,19 +68,19 @@
     </object>
     
     <object class="wxGtwPollQuestion" table="wx_gtw_pollanswer" extends="xPDOSimpleObject">
-	    <field key="question" dbtype="text" phptype="string" null="false" default=""/>
-		<field key="wxgtwsession" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
+        <field key="question" dbtype="text" phptype="string" null="false" default=""/>
+        <field key="wxgtwsession" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
         <aggregate alias="Session" class="wxGtwSession" local="wxgtwsession" foreign="id" cardinality="one" owner="foreign"/>
         <composite alias="Answer" class="wxGtwPollAnswer" local="id" foreign="wxgtwpollquestion" cardinality="many" owner="local" />
         <index alias="wxgtwsession" name="wxgtwsession" primary="false" unique="false" type="BTREE">
             <column key="wxgtwsession" length="" collation="A" null="false" />
         </index>
-	</object>
+    </object>
     
     <object class="wxGtwPollAnswer" table="wx_gtw_pollanswer" extends="xPDOSimpleObject">
-		<field key="answer" dbtype="text" phptype="string" null="false" default=""/>
-		<field key="wxgtwpollquestion" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
-		<field key="wxgtwregistrant" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
+        <field key="answer" dbtype="text" phptype="string" null="false" default=""/>
+        <field key="wxgtwpollquestion" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
+        <field key="wxgtwregistrant" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
         <aggregate alias="Registrant" class="wxGtwRegistrant" local="wxgtwregistrant" foreign="id" cardinality="one" owner="foreign"/>
         <aggregate alias="Question" class="wxGtwPollQuestion" local="wxgtwpollquestion" foreign="id" cardinality="one" owner="foreign"/>
         <index alias="wxgtwpollquestion" name="wxgtwpollquestion" primary="false" unique="false" type="BTREE">
@@ -96,7 +96,7 @@
         <field key="sessionkey" dbtype="varchar" precision="100" phptype="string" null="false" default="" />
         <field key="averageinterestrating" dbtype="float" precision="20" phptype="float" null="false" default=0 />
         <field key="averageattentiveness" dbtype="float" precision="20" phptype="float" null="false" default=0 />
-		<field key="wxpresentation" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
+        <field key="wxpresentation" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
         <aggregate alias="Presentation" class="wxPresentation" local="wxpresentation" foreign="id" cardinality="one" owner="foreign"/>
         <composite alias="SurveyQuestion" class="wxGtwSurveyQuestion" local="id" foreign="wxgtwsession" cardinality="many" owner="local" />
         <composite alias="PollQuestion" class="wxGtwPollQuestion" local="id" foreign="wxgtwsession" cardinality="many" owner="local" />
