@@ -2,16 +2,17 @@
 <model package="wxgotowebinar" baseClass="xPDOObject" platform="mysql" defaultEngine="MyISAM" phpdoc-package="wxgotowebinar" version="1.1">
 
     <object class="wxGtwRegistrant" table="wx_gtw_registrant" extends="xPDOSimpleObject">
-        <field key="registrantkey" dbtype="varchar" precision="100" phptype="string" null="false" default="" />
+        <field key="registrantKey" dbtype="varchar" precision="100" phptype="string" null="false" default="" />
         <field key="status" dbtype="varchar" precision="255" phptype="string" null="false" default=""/>
-        <field key="joinurl" dbtype="varchar" precision="255" phptype="string" null="false" default=""/>
-        <field key="attendancetimeinseconds" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
+        <field key="joinUrl" dbtype="varchar" precision="255" phptype="string" null="false" default=""/>
+        <field key="email" dbtype="varchar" precision="255" phptype="string" null="false" default=""/>
+        <field key="attendanceTimeInSeconds" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0" />
         <field key="wxgtwsession" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
         <field key="wxregistration" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
         <aggregate alias="Session" class="wxGtwSession" local="wxgtwsession" foreign="id" cardinality="one" owner="foreign"/>
         <aggregate alias="Registration" class="wxRegistration" local="wxregistration" foreign="id" cardinality="one" owner="foreign"/>
         <composite alias="Question" class="wxGtwQuestion" local="id" foreign="wxgtwregistrant" cardinality="many" owner="local" />
-        <composite alias="SurveyAnswer" class="wxGtwSurveyAnswer" local="id" foreign="wxgtwregistrant" cardinality="many" owner="local" />
+        <composite alias="PollAnswer" class="wxGtwPollAnswer" local="id" foreign="wxgtwregistrant" cardinality="many" owner="local" />
         <index alias="registrantkey" name="registrantkey" primary="false" unique="false" type="BTREE">
             <column key="registrantkey" length="" collation="A" null="false" />
         </index>
@@ -43,63 +44,59 @@
         </index>
     </object>
     
-    <object class="wxGtwSurveyQuestion" table="wx_gtw_surveyanswer" extends="xPDOSimpleObject">
+    <object class="wxGtwPoll" table="wx_gtw_poll" extends="xPDOSimpleObject">
         <field key="question" dbtype="text" phptype="string" null="false" default=""/>
+        <field key="numberOfResponses" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
+        <field key="type" dbtype="varchar" precision="20" phptype="string" null="false" default="" />
         <field key="wxgtwsession" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
         <aggregate alias="Session" class="wxGtwSession" local="wxgtwsession" foreign="id" cardinality="one" owner="foreign"/>
-        <composite alias="Answer" class="wxGtwSurveyAnswer" local="id" foreign="wxgtwsurveyquestion" cardinality="many" owner="local" />
+        <composite alias="Response" class="wxGtwPollResponse" local="id" foreign="wxgtwpoll" cardinality="many" owner="local" />
         <index alias="wxgtwsession" name="wxgtwsession" primary="false" unique="false" type="BTREE">
             <column key="wxgtwsession" length="" collation="A" null="false" />
         </index>
     </object>
     
-    <object class="wxGtwSurveyAnswer" table="wx_gtw_surveyanswer" extends="xPDOSimpleObject">
-        <field key="answer" dbtype="text" phptype="string" null="false" default=""/>
-        <field key="wxgtwsurveyquestion" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
-        <field key="wxgtwregistrant" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
-        <aggregate alias="Registrant" class="wxGtwRegistrant" local="wxgtwregistrant" foreign="id" cardinality="one" owner="foreign"/>
-        <aggregate alias="Question" class="wxGtwSurveyQuestion" local="wxgtwsurveyquestion" foreign="id" cardinality="one" owner="foreign"/>
-        <index alias="wxgtwsurveyquestion" name="wxgtwsurveyquestion" primary="false" unique="false" type="BTREE">
-            <column key="wxgtwsurveyquestion" length="" collation="A" null="false" />
-        </index>
-        <index alias="wxgtwregistrant" name="wxgtwregistrant" primary="false" unique="false" type="BTREE">
-            <column key="wxgtwregistrant" length="" collation="A" null="false" />
-        </index>
-    </object>
-    
-    <object class="wxGtwPollQuestion" table="wx_gtw_pollanswer" extends="xPDOSimpleObject">
-        <field key="question" dbtype="text" phptype="string" null="false" default=""/>
-        <field key="wxgtwsession" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
-        <aggregate alias="Session" class="wxGtwSession" local="wxgtwsession" foreign="id" cardinality="one" owner="foreign"/>
-        <composite alias="Answer" class="wxGtwPollAnswer" local="id" foreign="wxgtwpollquestion" cardinality="many" owner="local" />
-        <index alias="wxgtwsession" name="wxgtwsession" primary="false" unique="false" type="BTREE">
-            <column key="wxgtwsession" length="" collation="A" null="false" />
+    <object class="wxGtwPollResponse" table="wx_gtw_pollresponse" extends="xPDOSimpleObject">
+        <field key="text" dbtype="text" phptype="string" null="false" default=""/>
+        <field key="percentage" dbtype="float" phptype="float" null="false" default=""/>
+        <field key="wxgtwpoll" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
+        <aggregate alias="Poll" class="wxGtwPoll" local="wxgtwpoll" foreign="id" cardinality="one" owner="foreign"/>
+        <composite alias="Answer" class="wxGtwPollAnswer" local="id" foreign="wxgtwpollresponse" cardinality="many" owner="local" />
+        <index alias="wxgtwpoll" name="wxgtwpoll" primary="false" unique="false" type="BTREE">
+            <column key="wxgtwpoll" length="" collation="A" null="false" />
         </index>
     </object>
     
     <object class="wxGtwPollAnswer" table="wx_gtw_pollanswer" extends="xPDOSimpleObject">
-        <field key="answer" dbtype="text" phptype="string" null="false" default=""/>
-        <field key="wxgtwpollquestion" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
+        <field key="wxgtwpollresponse" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
         <field key="wxgtwregistrant" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
         <aggregate alias="Registrant" class="wxGtwRegistrant" local="wxgtwregistrant" foreign="id" cardinality="one" owner="foreign"/>
-        <aggregate alias="Question" class="wxGtwPollQuestion" local="wxgtwpollquestion" foreign="id" cardinality="one" owner="foreign"/>
-        <index alias="wxgtwpollquestion" name="wxgtwpollquestion" primary="false" unique="false" type="BTREE">
-            <column key="wxgtwpollquestion" length="" collation="A" null="false" />
-        </index>
+        <aggregate alias="Response" class="wxGtwResponse" local="wxgtwpollresponse" foreign="id" cardinality="one" owner="foreign"/>
         <index alias="wxgtwregistrant" name="wxgtwregistrant" primary="false" unique="false" type="BTREE">
             <column key="wxgtwregistrant" length="" collation="A" null="false" />
+        </index>
+        <index alias="wxgtwpollresponse" name="wxgtwpollresponse" primary="false" unique="false" type="BTREE">
+            <column key="wxgtwpollresponse" length="" collation="A" null="false" />
         </index>
     </object>
     
     <object class="wxGtwSession" table="wx_gtw_session" extends="xPDOSimpleObject">
-        <field key="webinarkey" dbtype="varchar" precision="100" phptype="string" null="false" default="" />
-        <field key="sessionkey" dbtype="varchar" precision="100" phptype="string" null="false" default="" />
-        <field key="averageinterestrating" dbtype="float" precision="20" phptype="float" null="false" default=0 />
-        <field key="averageattentiveness" dbtype="float" precision="20" phptype="float" null="false" default=0 />
+        <field key="webinarKey" dbtype="varchar" precision="100" phptype="string" null="false" default="" />
+        <field key="sessionKey" dbtype="varchar" precision="100" phptype="string" null="false" default="" />
+        <field key="startTime" dbtype="datetime" phptype="datetime" null="true"/>
+        <field key="endTime" dbtype="datetime" phptype="datetime" null="true"/>
+        <field key="percentageAttendance" dbtype="float" precision="20" phptype="float" null="false" default=0 />
+        <field key="averageAttendanceTimeSeconds" dbtype="float" precision="20" phptype="float" null="false" default=0 />
+        <field key="averageInterestRating" dbtype="float" precision="20" phptype="float" null="false" default=0 />
+        <field key="averageAttentiveness" dbtype="float" precision="20" phptype="float" null="false" default=0 />
+        <field key="pollCount" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
+        <field key="surveyCount" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
+        <field key="questionsAsked" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
+        <field key="percentagePollsCompleted" dbtype="float" precision="20" phptype="float" null="false" default=0 />
+        <field key="percentageSurveysCompleted" dbtype="float" precision="20" phptype="float" null="false" default=0 />
         <field key="wxpresentation" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
         <aggregate alias="Presentation" class="wxPresentation" local="wxpresentation" foreign="id" cardinality="one" owner="foreign"/>
-        <composite alias="SurveyQuestion" class="wxGtwSurveyQuestion" local="id" foreign="wxgtwsession" cardinality="many" owner="local" />
-        <composite alias="PollQuestion" class="wxGtwPollQuestion" local="id" foreign="wxgtwsession" cardinality="many" owner="local" />
+        <composite alias="PollQuestion" class="wxgtwpoll" local="id" foreign="wxgtwsession" cardinality="many" owner="local" />
         <composite alias="Registrant" class="wxGtwRegistrant" local="id" foreign="wxgtwsession" cardinality="many" owner="local" />
         <index alias="webinarkey" name="webinarkey" primary="false" unique="false" type="BTREE">
             <column key="webinarkey" length="" collation="A" null="false" />
