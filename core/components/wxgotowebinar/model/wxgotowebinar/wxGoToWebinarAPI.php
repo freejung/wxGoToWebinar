@@ -65,7 +65,7 @@ class wxGTW {
         $this->client = new gtwApiClient($this->apps[$app]['oauthToken']);
     }
 
-	/** Registrants **/
+    /** Registrants **/
 
     public function createRegistrant($webinarKey, $email, $firstname, $lastname) {
         $url = $this->organizerBaseUrl.'/webinars/'.$webinarKey.'/registrants';
@@ -77,11 +77,11 @@ class wxGTW {
         return $this->client->post($url, $data);
     }
 
-	public function getRegistrant($webinarKey, $registrantKey) {
+    public function getRegistrant($webinarKey, $registrantKey) {
         return $this->client->get($this->organizerBaseUrl.'/webinars/'.$webinarKey.'/registrants/'.$registrantKey);
     }
     
-	public function getRegistrants($webinarKey) {
+    public function getRegistrants($webinarKey) {
         return $this->client->get($this->organizerBaseUrl.'/webinars/'.$webinarKey.'/registrants');
     }
     
@@ -91,7 +91,7 @@ class wxGTW {
     
     /** Attendees **/
     
-	public function getAttendee($webinarKey, $sessionKey, $registrantKey) {
+    public function getAttendee($webinarKey, $sessionKey, $registrantKey) {
         return $this->client->get($this->organizerBaseUrl.'/webinars/'.$webinarKey.'/sessions/'.$sessionKey.'/attendees/'.$registrantKey);
     }
     
@@ -99,7 +99,7 @@ class wxGTW {
         return $this->client->get($this->organizerBaseUrl.'/webinars/'.$webinarKey.'/sessions/'.$sessionKey.'/attendees/'.$registrantKey.'/polls');
     }
     
-	public function getAttendeeQuestions($webinarKey, $sessionKey, $registrantKey) {
+    public function getAttendeeQuestions($webinarKey, $sessionKey, $registrantKey) {
         return $this->client->get($this->organizerBaseUrl.'/webinars/'.$webinarKey.'/sessions/'.$sessionKey.'/attendees/'.$registrantKey.'/questions');
     }
     
@@ -107,13 +107,13 @@ class wxGTW {
         return $this->client->get($this->organizerBaseUrl.'/webinars/'.$webinarKey.'/sessions/'.$sessionKey.'/attendees/'.$registrantKey.'/surveys');
     }
     
-	public function getAttendeesForAllWebinarSessions($webinarKey, $sessionKey, $registrantKey) {
+    public function getAttendeesForAllWebinarSessions($webinarKey, $sessionKey, $registrantKey) {
         return $this->client->get($this->organizerBaseUrl.'/webinars/'.$webinarKey.'/attendees');
     }
 
-	/** Webinars **/
+    /** Webinars **/
 
-	public function getHistoricalWebinars() {
+    public function getHistoricalWebinars() {
         return $this->client->get($this->organizerBaseUrl.'/historicalWebinars');
     }
 
@@ -139,7 +139,7 @@ class wxGTW {
         return $this->client->get($this->organizerBaseUrl.'/webinars/'.$webinarKey.'/sessions/'.$sessionKey);
     }
     
-	public function getSessionAttendees($webinarKey, $sessionKey) {
+    public function getSessionAttendees($webinarKey, $sessionKey) {
         return $this->client->get($this->organizerBaseUrl.'/webinars/'.$webinarKey.'/sessions/'.$sessionKey.'/attendees');
     }
     
@@ -155,11 +155,11 @@ class wxGTW {
         return $this->client->get($this->organizerBaseUrl.'/webinars/'.$webinarKey.'/sessions/'.$sessionKey.'/questions');
     }
     
-	public function getSessionSurveys($webinarKey, $sessionKey) {
+    public function getSessionSurveys($webinarKey, $sessionKey) {
         return $this->client->get($this->organizerBaseUrl.'/webinars/'.$webinarKey.'/sessions/'.$sessionKey.'/surveys');
     }
     
-	public function getWebinarSessions($webinarKey) {
+    public function getWebinarSessions($webinarKey) {
         return $this->client->get($this->organizerBaseUrl.'/webinars/'.$webinarKey.'/sessions');
     }
     
