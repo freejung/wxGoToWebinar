@@ -1,22 +1,16 @@
 <?php
 /**
- * wxGoToWebinar
- *
- * Copyright 2012 by Eli Snyder <freejung@gmail.com>
- */
-/**
- * @package wxGoToWebinar
- * @subpackage model
+ * @package wxgotowebinar
  */
 class wxGtwSession extends xPDOSimpleObject {
-
-    /*
+	
+	/*
     * @param array $polls
     * @param string $pollType
     */
-    public function pollSetup ($polls, $pollType) {
+    public function pollSetup ($polls = array(), $pollType = 'poll') {
         foreach ($polls as $polldata) {
-            $poll = new wxGtwPoll();
+            $poll = new wxGtwPoll;
             $poll->set('type', $pollType);
             $poll->fromFullArray($polls);
             $poll->addOne('Session', $this);
@@ -29,9 +23,9 @@ class wxGtwSession extends xPDOSimpleObject {
     * @param array $questions
     * @param int $sessionId
     */
-    public function addQuestions ($questions, $sessionId) {
+    public function addQuestions ($questions = array(), $sessionId) {
         foreach($questions as $questionData) {
-            $question = new wxGtwQuestion();
+            $question = new wxGtwQuestion;
             $question->fromFullArray($questionData);
             $registrantQuery = $this->xpdo->newQuery('wxGtwRegistrant');
             $registrantQuery->where(array(
@@ -44,5 +38,6 @@ class wxGtwSession extends xPDOSimpleObject {
         }
         return true;
     }
-    
+	
 }
+?>

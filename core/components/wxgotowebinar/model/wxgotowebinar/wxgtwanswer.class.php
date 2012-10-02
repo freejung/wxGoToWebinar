@@ -1,11 +1,6 @@
 <?php
 /**
- * wxGoToWebinar
- *
- * Copyright 2012 by Eli Snyder <freejung@gmail.com>
- */
-/**
- * @package wxGoToWebinar
- * @subpackage model
+ * @package wxgotowebinar
  */
 class wxGtwAnswer extends xPDOSimpleObject {}
+?>

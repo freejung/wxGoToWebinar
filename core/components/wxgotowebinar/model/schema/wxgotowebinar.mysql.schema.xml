@@ -58,7 +58,7 @@
     
     <object class="wxGtwPollResponse" table="wx_gtw_pollresponse" extends="xPDOSimpleObject">
         <field key="text" dbtype="text" phptype="string" null="false" default=""/>
-        <field key="percentage" dbtype="float" phptype="float" null="false" default=""/>
+        <field key="percentage" dbtype="varchar" precision="20" phptype="string" null="false" default="" />
         <field key="wxgtwpoll" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
         <aggregate alias="Poll" class="wxGtwPoll" local="wxgtwpoll" foreign="id" cardinality="one" owner="foreign"/>
         <composite alias="Answer" class="wxGtwPollAnswer" local="id" foreign="wxgtwpollresponse" cardinality="many" owner="local" />
@@ -85,15 +85,15 @@
         <field key="sessionKey" dbtype="varchar" precision="100" phptype="string" null="false" default="" />
         <field key="startTime" dbtype="datetime" phptype="datetime" null="true"/>
         <field key="endTime" dbtype="datetime" phptype="datetime" null="true"/>
-        <field key="percentageAttendance" dbtype="float" precision="20" phptype="float" null="false" default=0 />
-        <field key="averageAttendanceTimeSeconds" dbtype="float" precision="20" phptype="float" null="false" default=0 />
-        <field key="averageInterestRating" dbtype="float" precision="20" phptype="float" null="false" default=0 />
-        <field key="averageAttentiveness" dbtype="float" precision="20" phptype="float" null="false" default=0 />
+        <field key="percentageAttendance" dbtype="varchar" precision="20" phptype="string" null="false" default="" />
+        <field key="averageAttendanceTimeSeconds" dbtype="varchar" precision="20" phptype="string" null="false" default="" />
+        <field key="averageInterestRating" dbtype="varchar" precision="20" phptype="string" null="false" default="" />
+        <field key="averageAttentiveness" dbtype="varchar" precision="20" phptype="string" null="false" default="" />
         <field key="pollCount" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
         <field key="surveyCount" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
         <field key="questionsAsked" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
-        <field key="percentagePollsCompleted" dbtype="float" precision="20" phptype="float" null="false" default=0 />
-        <field key="percentageSurveysCompleted" dbtype="float" precision="20" phptype="float" null="false" default=0 />
+        <field key="percentagePollsCompleted" dbtype="varchar" precision="20" phptype="string" null="false" default="" />
+        <field key="percentageSurveysCompleted" dbtype="varchar" precision="20" phptype="string" null="false" default="" />
         <field key="wxpresentation" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
         <aggregate alias="Presentation" class="wxPresentation" local="wxpresentation" foreign="id" cardinality="one" owner="foreign"/>
         <composite alias="PollQuestion" class="wxgtwpoll" local="id" foreign="wxgtwsession" cardinality="many" owner="local" />
