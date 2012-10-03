@@ -24,13 +24,16 @@
  *
  * @package wxgotowebinar
  */
+ 
+require_once 'wxGoToWebinarAPI.php'; 
+
 class wxGoToWebinar {
     /** @var \modX $modx */
     public $modx;
     /** @var array $config */
     public $config = array();
-    /** @var wxGTW $gtw */
-    protected $gtw;
+    /** @var wxGTW $gtwAPI */
+    public $gtwAPI;
 
     function __construct(modX &$modx,array $config = array()) {
         $this->modx =& $modx;
@@ -55,30 +58,29 @@ class wxGoToWebinar {
         $this->modx->addPackage('wxgotowebinar',$this->config['modelPath']);
         $this->modx->lexicon->load('wxgotowebinar:default');
         //Instantiate a new client for the GoToWebinar REST API
-        $this->gtw = new wxGTW(array('your_app' => array(
-            'developerKey' => $this->modx->getOption('wxgotowebinar.developer_key',$config,''),
-            'oauthToken' => $this->modx->getOption('wxgotowebinar.oauth_token',$config,''),
-            'organizerKey' => $this->modx->getOption('wxgotowebinar.organizer_key',$config,''),
-        )));    
+        
+        $this->gtwAPI = new wxGTW($this->modx->getOption('wxgotowebinar.developer_key',$config,''), $this->modx->getOption('wxgotowebinar.organizer_key',$config,''), $this->modx->getOption('wxgotowebinar.oauth_token',$config,''));    
+        
     }
     /*
     * @param wxRegistration $registration
     */
+    
     public function register ($registration) {
         $prospect = $registration->getOne('wxProspect');
         $profile = $prospect->getOne('Profile');
         $registrant = new wxGtwRegistrant();
         $presentation = $registration->getOne('wxPresentation');
-        $webinarKey = $presentation->get('gtwid');
+        $webinarKey = str_replace('-', '', $presentation->get('gtwid'));
         $email = $profile->get('email');
-        $fullname = $profile->get('fullname')
+        $fullname = $profile->get('fullname');
         $firstname = substr($fullname, 0, strpos($fullname, ' ')-1);
         $lastname = substr($fullname, strpos($fullname, ' '));
         $registrant->addOne($registration);
         $response = '';
         try
         {
-        $response = $this->gtw->createRegistrant($webinarKey, $email, $firstname, $lastname); 
+        $response = $this->gtwAPI->createRegistrant($webinarKey, $email, $firstname, $lastname); 
         }
         catch (Exception $e)
         {
@@ -92,13 +94,14 @@ class wxGoToWebinar {
     /*
     * @param wxPresentation $presentation
     */
+    
     public function getAttendance ($presentation) {
-        $webinarKey = $presentation->get('gtwid');
+        $webinarKey = str_replace('-', '', $presentation->get('gtwid'));
         $response = '';
         //get all sessions for the current webinar presentation
         try
         {
-        $response = $this->gtw->getWebinarSessions($webinarKey); 
+        $response = $this->gtwAPI->getWebinarSessions($webinarKey); 
         }
         catch (Exception $e)
         {
@@ -116,7 +119,7 @@ class wxGoToWebinar {
             //get session performance data and record it
             try
             {
-            $response = $this->gtw->getSessionPerformance($webinarKey, $sessionData['sessionKey']); 
+            $response = $this->gtwAPI->getSessionPerformance($webinarKey, $sessionData['sessionKey']); 
             }
             catch (Exception $e)
             {
@@ -129,7 +132,7 @@ class wxGoToWebinar {
             //get poll and survey questions and add them to the session
             try
             {
-            $response = $this->gtw->getSessionPolls($webinarKey, $sessionData['sessionKey']); 
+            $response = $this->gtwAPI->getSessionPolls($webinarKey, $sessionData['sessionKey']); 
             }
             catch (Exception $e)
             {
@@ -139,7 +142,7 @@ class wxGoToWebinar {
             $session->pollSetup($sessionPolls, 'poll');
             try
             {
-            $response = $this->gtw->getSessionSurveys($webinarKey, $sessionData['sessionKey']); 
+            $response = $this->gtwAPI->getSessionSurveys($webinarKey, $sessionData['sessionKey']); 
             }
             catch (Exception $e)
             {
@@ -150,7 +153,7 @@ class wxGoToWebinar {
             //get session attendance data
             try
             {
-            $response = $this->gtw->getSessionAttendees($webinarKey, $sessionData['sessionKey']); 
+            $response = $this->gtwAPI->getSessionAttendees($webinarKey, $sessionData['sessionKey']); 
             }
             catch (Exception $e)
             {
@@ -167,7 +170,7 @@ class wxGoToWebinar {
                         //record poll and survey answers for attendees
                         try
                         {
-                        $response = $this->gtw->getAttendeePollAnswers($webinarKey, $sessionData['sessionKey'], $att['registrantKey']); 
+                        $response = $this->gtwAPI->getAttendeePollAnswers($webinarKey, $sessionData['sessionKey'], $att['registrantKey']); 
                         }
                         catch (Exception $e)
                         {
@@ -177,7 +180,7 @@ class wxGoToWebinar {
                         $registrant->addPollAnswers($pollAnswers, $session->id);
                         try
                         {
-                        $response = $this->gtw->getAttendeeSurveyAnswers($webinarKey, $sessionData['sessionKey'], $att['registrantKey']); 
+                        $response = $this->gtwAPI->getAttendeeSurveyAnswers($webinarKey, $sessionData['sessionKey'], $att['registrantKey']); 
                         }
                         catch (Exception $e)
                         {
@@ -192,7 +195,7 @@ class wxGoToWebinar {
             //get session questions and associate them with registrants
             try
             {
-            $response = $this->gtw->getSessionQuestions($webinarKey, $sessionData['sessionKey']); 
+            $response = $this->gtwAPI->getSessionQuestions($webinarKey, $sessionData['sessionKey']); 
             }
             catch (Exception $e)
             {

@@ -23,7 +23,7 @@ class gtwApiClient {
                 'Content-Length: '.strlen($data_string)
             );
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers); 
-        return = curl_exec($ch);
+        return curl_exec($ch);
     }
     
     public function get($url) {
@@ -34,11 +34,12 @@ class gtwApiClient {
         $headers = array(
                 'Content-Type: application/json',
                 'Accept: application/json',
-                'Authorization: OAuth oauth_token=.'$this->oauthToken
+                'Authorization: OAuth oauth_token='.$this->oauthToken
             );
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers); 
         return curl_exec($ch);
     }
+    
 }
 
 class wxGTW {
@@ -46,23 +47,15 @@ class wxGTW {
     private $developerKey;
     private $organizerKey;
     private $organizerBaseUrl;
+    private $oauthToken;
     protected $client;
     
-    private $apps = array(
-        'your_app' => array(
-            'developerKey' => '',
-            'oauthToken' => '',
-            'organizerKey' => '')
-    );
-    
-    public function __construct($app = 'your_app') {
-        if(!array_key_exists($app, $this->apps)) {
-            throw new Exception('Invalid argument: unknown developer key');
-        }
-        $this->developerKey = $this->apps[$app]['developerKey'];
-        $this->organizerKey = $this->apps[$app]['organizerKey'];
+    public function __construct($developerKey, $organizerKey, $oauthToken) {
+        $this->developerKey = $developerKey;
+        $this->organizerKey = $organizerKey;
+        $this->oauthToken = $oauthToken;
         $this->organizerBaseUrl = 'https://api.citrixonline.com/G2W/rest/organizers/'.$this->organizerKey;
-        $this->client = new gtwApiClient($this->apps[$app]['oauthToken']);
+        $this->client = new gtwApiClient($oauthToken);
     }
 
     /** Registrants **/
@@ -107,7 +100,7 @@ class wxGTW {
         return $this->client->get($this->organizerBaseUrl.'/webinars/'.$webinarKey.'/sessions/'.$sessionKey.'/attendees/'.$registrantKey.'/surveys');
     }
     
-    public function getAttendeesForAllWebinarSessions($webinarKey, $sessionKey, $registrantKey) {
+    public function getAttendeesForAllWebinarSessions($webinarKey) {
         return $this->client->get($this->organizerBaseUrl.'/webinars/'.$webinarKey.'/attendees');
     }
 
