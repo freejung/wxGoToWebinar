@@ -9,24 +9,31 @@ class wxGtwRegistrant extends xPDOSimpleObject {
     * @param int $sessionId
     */
     public function addPollAnswers ($pollAnswers = array(), $sessionId) {
+    	$answersArray = array();
         foreach ($pollAnswers as $answerData) {
-            $answer = new wxGtwPollAnswer;
+            $answer = $this->xpdo->newObject('wxGtwPollAnswer');
             $pollQuery = $this->xpdo->newQuery('wxGtwPoll');
             $pollQuery->where(array(
                 'question:=' => $answerData['question'],
                 'wxgtwsession:=' => $sessionId,
             ));
             if($poll = $this->xpdo->getObject('wxGtwPoll', $pollQuery)) {
-                $answer->addOne($poll);
-                if($responses = $poll->getMany('wxGtwPollResponse', array('text:=' => $answerData['answer']))) {
-                    //there should be only one response with matching text, but if there is more than one
-                    //just use the first one
-                    $answer->addOne($responses[0]);
+            	echo('poll found: '.$poll->id);
+            	$responseQuery = $this->xpdo->newQuery('wxGtwPollResponse');
+            	$responseQuery->where(array(
+            		'text:=' => $answerData['answer'],
+            		'wxgtwpoll:=' => $poll->id,
+            	));
+                if($response = $this->xpdo->getObject('wxGtwPollResponse',$responseQuery)) {
+                	echo('<br>response found: '. $response->id);
+                    $answer->addOne($response);
                     $answer->save();
                 }
             }
+			$answersArray[] = $answer;
         }
-        return true;
+        $this->addMany($answersArray);
+        return $this->save();
     }
 	
 }

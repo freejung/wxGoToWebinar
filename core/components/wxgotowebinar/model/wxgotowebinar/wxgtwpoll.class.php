@@ -9,14 +9,14 @@ class wxGtwPoll extends xPDOSimpleObject {
     */
     public function fromFullArray ($pollData = array()) {
         $this->fromArray($pollData);
-        $this->save();
+        $responseArray = array();
         foreach($pollData['responses'] as $responseData) {
-            $response = new wxGtwPollResponse;
+            $response = $this->xpdo->newObject('wxGtwPollResponse');
             $response->fromArray($responseData);
-            $response->addOne('Poll', $this);
-            $response->save();
+            $responseArray[] = $response;
         }
-        return true;
+        $this->addMany($responseArray);
+        return $this->save();;
     }
 	
 }

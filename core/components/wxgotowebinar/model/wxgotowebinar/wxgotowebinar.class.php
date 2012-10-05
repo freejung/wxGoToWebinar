@@ -63,32 +63,52 @@ class wxGoToWebinar {
         
     }
     /*
-    * @param wxRegistration $registration
+    * @param array of wxRegistration $registrations
     */
     
-    public function register ($registration) {
-        $prospect = $registration->getOne('wxProspect');
-        $profile = $prospect->getOne('Profile');
-        $registrant = new wxGtwRegistrant();
-        $presentation = $registration->getOne('wxPresentation');
-        $webinarKey = str_replace('-', '', $presentation->get('gtwid'));
-        $email = $profile->get('email');
-        $fullname = $profile->get('fullname');
-        $firstname = substr($fullname, 0, strpos($fullname, ' ')-1);
-        $lastname = substr($fullname, strpos($fullname, ' '));
-        $registrant->addOne($registration);
-        $response = '';
-        try
-        {
-        $response = $this->gtwAPI->createRegistrant($webinarKey, $email, $firstname, $lastname); 
+    public function register ($registrations) {
+    	foreach ($registrations as $registration) {
+    		$presentation = $registration->getOne('Presentation');
+    		$webinarKey = str_replace('-', '', $presentation->get('gtwid'));
+    		$sessionQuery = $this->modx->newQuery('wxGtwSession');
+    		$sessionQuery->where(array(
+    			'webinarKey:=' => $webinarKey,
+    			'wxpresentation:=' => $presentation->id,
+    		));
+    		if(!$session = $this->modx->getObject('wxGtwSession', $sessionQuery)) {
+    			$session = $this->modx->newObject('wxGtwSession');
+    			$session->addOne($presentation);
+    			$session->set('webinarKey', $webinarKey);
+    			$session->save();
+    		}
+    		$registrantQuery = $this->modx->newQuery('wxGtwRegistrant');
+    		$registrantQuery->where(array(
+    			'wxgtwsession:=' => $presentation->id,
+    			'wxregistration:=' => $session->id,
+    		));
+    		if(!$registrant = $this->modx->getObject('wxGtwRegistrant', $registrantQuery)) {
+		        $prospect = $registration->getOne('Prospect');
+		        $profile = $prospect->getOne('Profile');
+		        $registrant = $this->modx->newObject('wxGtwRegistrant');
+		        $email = $profile->get('email');
+		        $fullname = $profile->get('fullname');
+		        $firstname = substr($fullname, 0, strpos($fullname, ' '));
+		        $lastname = substr($fullname, strpos($fullname, ' '));
+		        $registrant->addOne($registration);
+		        $response = '';
+		        try
+		        {
+		        $response = $this->gtwAPI->createRegistrant($webinarKey, $email, $firstname, $lastname); 
+		        }
+		        catch (Exception $e)
+		        {
+		        $this->modx->log(modX::LOG_LEVEL_ERROR, 'wxGTW error: '.$e->getMessage());
+		        }
+		        $registrant->fromJSON($response);
+				$registrant->save();
+			}
         }
-        catch (Exception $e)
-        {
-        $this->modx->log(modX::LOG_LEVEL_ERROR, 'wxGTW error: '.$e->getMessage());
-        }
-        $registrant->fromJSON($response);
-        $registration->set('reg', $registrant->get('joinUrl'));
-        return $registrant->save();
+        return true;
     }
     
     /*
@@ -96,6 +116,8 @@ class wxGoToWebinar {
     */
     
     public function getAttendance ($presentation) {
+    	set_time_limit(86400);
+    	$ret = '';
         $webinarKey = str_replace('-', '', $presentation->get('gtwid'));
         $response = '';
         //get all sessions for the current webinar presentation
@@ -109,47 +131,58 @@ class wxGoToWebinar {
         }
         $sessionArray = $this->modx->fromJSON($response);
         foreach ($sessionArray as $sessionData) {
-            //convert times to mySQL time format
-            $sessionData['startTime'] = date( 'Y-m-d H:i:s',strtotime($sessionData['startTime']));
-            $sessionData['endTime'] = date( 'Y-m-d H:i:s',strtotime($sessionData['endTime']));
-            //instantiate a new wxGtwSession object, set basic properties and save
-            $session = new wxGtwSession;
-            $session->fromArray($sessionData);
-            $session->save();
-            //get session performance data and record it
-            try
-            {
-            $response = $this->gtwAPI->getSessionPerformance($webinarKey, $sessionData['sessionKey']); 
+        	
+            //get the session object for this session if it exists, otherwise make a new one
+            if (!$session = $this->modx->getObject('wxGtwSession',array('sessionKey' => $sessionData['sessionKey']))) {
+            	$sessionQuery = $this->modx->newQuery('wxGtwSession');
+            	$sessionQuery->where(array(
+            		'webinarKey:=' => $webinarKey,
+	    			'wxpresentation:=' => $presentation->id,
+            	));
+            	if(!$session = $this->modx->getObject('wxGtwSession', $sessionQuery)) {
+	    			$session = $this->modx->newObject('wxGtwSession');
+	    			$session->addOne($presentation);
+	    		}
+	            $sessionData['startTime'] = date( 'Y-m-d H:i:s',strtotime($sessionData['startTime']));
+	            $sessionData['endTime'] = date( 'Y-m-d H:i:s',strtotime($sessionData['endTime']));
+	            $session->fromArray($sessionData);
+	            $session->save();
+	            //get session performance data and record it
+	            try
+	            {
+	            $response = $this->gtwAPI->getSessionPerformance($webinarKey, $sessionData['sessionKey']); 
+	            }
+	            catch (Exception $e)
+	            {
+	            $this->modx->log(modX::LOG_LEVEL_ERROR, 'wxGTW error: '.$e->getMessage());
+	            }
+	            $performance = $this->modx->fromJSON($response);
+	            $session->fromArray($performance['attendance']);
+	            $session->fromArray($performance['pollsAndSurveys']);
+	            $session->save();
+	            //get poll and survey questions and add them to the session
+	            try
+	            {
+	            $response = $this->gtwAPI->getSessionPolls($webinarKey, $sessionData['sessionKey']); 
+	            }
+	            catch (Exception $e)
+	            {
+	            $this->modx->log(modX::LOG_LEVEL_ERROR, 'wxGTW error: '.$e->getMessage());
+	            }
+	            $sessionPolls = $this->modx->fromJSON($response);
+	            $session->pollSetup($sessionPolls, 'poll');
+	            try
+	            {
+	            $response = $this->gtwAPI->getSessionSurveys($webinarKey, $sessionData['sessionKey']); 
+	            }
+	            catch (Exception $e)
+	            {
+	            $this->modx->log(modX::LOG_LEVEL_ERROR, 'wxGTW error: '.$e->getMessage());
+	            }
+	            $sessionSurveys = $this->modx->fromJSON($response);
+	            $session->pollSetup($sessionSurveys, 'survey');
             }
-            catch (Exception $e)
-            {
-            $this->modx->log(modX::LOG_LEVEL_ERROR, 'wxGTW error: '.$e->getMessage());
-            }
-            $performance = $this->modx->fromJSON($response);
-            $session->fromArray($performance['attendance']);
-            $session->fromArray($performance['pollsAndSurveys']);
-            $session->save();
-            //get poll and survey questions and add them to the session
-            try
-            {
-            $response = $this->gtwAPI->getSessionPolls($webinarKey, $sessionData['sessionKey']); 
-            }
-            catch (Exception $e)
-            {
-            $this->modx->log(modX::LOG_LEVEL_ERROR, 'wxGTW error: '.$e->getMessage());
-            }
-            $sessionPolls = $this->modx->fromJSON($response);
-            $session->pollSetup($sessionPolls, 'poll');
-            try
-            {
-            $response = $this->gtwAPI->getSessionSurveys($webinarKey, $sessionData['sessionKey']); 
-            }
-            catch (Exception $e)
-            {
-            $this->modx->log(modX::LOG_LEVEL_ERROR, 'wxGTW error: '.$e->getMessage());
-            }
-            $sessionSurveys = $this->modx->fromJSON($response);
-            $session->pollSetup($sessionSurveys, 'survey');
+            
             //get session attendance data
             try
             {
@@ -163,33 +196,50 @@ class wxGoToWebinar {
             foreach ($attArray as $att) {
                 //record attendance for registrants who attended
                 if($att['attendanceTimeInSeconds']) {
-                    if($registrant = $this->modx->getObject('wxGtwRegistrant', array('registrantKey' => $att['registrantKey']))) {
-                        $registrant->set('attendanceTimeInSeconds', $att['attendanceTimeInSeconds']);
-                        $registrant->addOne($session);
-                        $registrant->save();
-                        //record poll and survey answers for attendees
-                        try
-                        {
-                        $response = $this->gtwAPI->getAttendeePollAnswers($webinarKey, $sessionData['sessionKey'], $att['registrantKey']); 
-                        }
-                        catch (Exception $e)
-                        {
-                        $this->modx->log(modX::LOG_LEVEL_ERROR, 'wxGTW error: '.$e->getMessage());
-                        }
-                        $pollAnswers = $this->modx->fromJSON($response);
-                        $registrant->addPollAnswers($pollAnswers, $session->id);
-                        try
-                        {
-                        $response = $this->gtwAPI->getAttendeeSurveyAnswers($webinarKey, $sessionData['sessionKey'], $att['registrantKey']); 
-                        }
-                        catch (Exception $e)
-                        {
-                        $this->modx->log(modX::LOG_LEVEL_ERROR, 'wxGTW error: '.$e->getMessage());
-                        }
-                        $surveyAnswers = $this->modx->fromJSON($response);
-                        $registrant->addPollAnswers($surveyAnswers, $session->id);
-                        $registrant->save();
+                	
+                    if(!$registrant = $this->modx->getObject('wxGtwRegistrant', array('registrantKey' => $att['registrantKey']))) {
+                    	
+                    	if(!$prospect = $this->modx->getObject('wxProspect', array('username' => $att['email']))) {
+                    		$prospect = $this->modx->newObject('wxProspect');
+                    		$prospect->standardSetup($att['email']);
+                    		$profile = $prospect->getOne('Profile');
+                    		$profile->set('fullname', $att['firstName'].' '.$att['lastName']);
+                    		$prospect->save();
+                    	}
+                    	
+                    	if(!$registrations = $prospect->getMany('Registration', array('presentation' => $presentation->id))) {
+                    		$registrations = $prospect->registerFor(array($presentation));
+                    	}
+                    	
+                    	$registrant = $this->modx->newObject('wxGtwRegistrant');
+                    	$registrant->addOne($registrations[0]);
+                    	
                     }
+                    $registrant->fromArray($att);
+                    $registrant->addOne($session);
+                    $registrant->save();
+                    //record poll and survey answers for attendees
+                    try
+                    {
+                    $response = $this->gtwAPI->getAttendeePollAnswers($webinarKey, $sessionData['sessionKey'], $att['registrantKey']); 
+                    }
+                    catch (Exception $e)
+                    {
+                    $this->modx->log(modX::LOG_LEVEL_ERROR, 'wxGTW error: '.$e->getMessage());
+                    }
+                    $pollAnswers = $this->modx->fromJSON($response);
+                    $registrant->addPollAnswers($pollAnswers, $session->id);
+                    try
+                    {
+                    $response = $this->gtwAPI->getAttendeeSurveyAnswers($webinarKey, $sessionData['sessionKey'], $att['registrantKey']); 
+                    }
+                    catch (Exception $e)
+                    {
+                    $this->modx->log(modX::LOG_LEVEL_ERROR, 'wxGTW error: '.$e->getMessage());
+                    }
+                    $surveyAnswers = $this->modx->fromJSON($response);
+                    $registrant->addPollAnswers($surveyAnswers, $session->id);
+                    
                 }
             }
             //get session questions and associate them with registrants
@@ -201,9 +251,12 @@ class wxGoToWebinar {
             {
             $this->modx->log(modX::LOG_LEVEL_ERROR, 'wxGTW error: '.$e->getMessage());
             }
+            $ret = $response;
             $sessionQuestions = $this->modx->fromJSON($response);
             $session->addQuestions($sessionQuestions);
+            
         }
+        return $ret;
     }
     
 }

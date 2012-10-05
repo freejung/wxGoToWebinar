@@ -192,9 +192,9 @@ $xpdo_meta_map['wxGtwSession']= array (
   ),
   'composites' => 
   array (
-    'PollQuestion' => 
+    'Poll' => 
     array (
-      'class' => 'wxgtwpoll',
+      'class' => 'wxGtwPoll',
       'local' => 'id',
       'foreign' => 'wxgtwsession',
       'cardinality' => 'many',

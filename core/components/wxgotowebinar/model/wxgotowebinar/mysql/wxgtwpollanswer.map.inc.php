@@ -80,7 +80,7 @@ $xpdo_meta_map['wxGtwPollAnswer']= array (
     ),
     'Response' => 
     array (
-      'class' => 'wxGtwResponse',
+      'class' => 'wxGtwPollResponse',
       'local' => 'wxgtwpollresponse',
       'foreign' => 'id',
       'cardinality' => 'one',

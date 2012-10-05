@@ -9,14 +9,14 @@ class wxGtwQuestion extends xPDOSimpleObject {
     */
     public function fromFullArray ($questionData = array()) {
         $this->fromArray($questionData);
-        $this->save();
+        $answerArray = array();
         foreach($questionData['answers'] as $answerData) {
-            $answer = new wxGtwAnswer;
+            $answer = $this->xpdo->newObject('wxGtwAnswer');
             $answer->fromArray($answerData);
-            $answer->addOne('Question', $this);
-            $answer->save();
+            $answerArray[] = $answer;
         }
-        return true;
+        $this->addMany($answerArray);
+        return $this->save();;
     }
 	
 }

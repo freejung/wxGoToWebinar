@@ -9,14 +9,15 @@ class wxGtwSession extends xPDOSimpleObject {
     * @param string $pollType
     */
     public function pollSetup ($polls = array(), $pollType = 'poll') {
+    	$pollArray = array();
         foreach ($polls as $polldata) {
-            $poll = new wxGtwPoll;
+            $poll = $this->xpdo->newObject('wxGtwPoll');
             $poll->set('type', $pollType);
-            $poll->fromFullArray($polls);
-            $poll->addOne('Session', $this);
-            $poll->save();
+            $poll->fromFullArray($polldata);
+            $pollArray[] = $poll;
         }
-        return true;
+        $this->addMany($pollArray);
+        return $this->save();
     }
     
     /*
@@ -24,8 +25,9 @@ class wxGtwSession extends xPDOSimpleObject {
     * @param int $sessionId
     */
     public function addQuestions ($questions = array(), $sessionId) {
+    	$questionArray = array();
         foreach($questions as $questionData) {
-            $question = new wxGtwQuestion;
+            $question = $this->xpdo->newObject('wxGtwQuestion');
             $question->fromFullArray($questionData);
             $registrantQuery = $this->xpdo->newQuery('wxGtwRegistrant');
             $registrantQuery->where(array(
@@ -34,9 +36,10 @@ class wxGtwSession extends xPDOSimpleObject {
             ));
             $registrant = $this->xpdo->getObject('wxGtwRegistrant', $registrantQuery);
             $question->addOne($registrant);
-            $question->save();
+            $questionArray[] = $question;
         }
-        return true;
+        $this->addMany($questionArray);
+        return $this->save();
     }
 	
 }

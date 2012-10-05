@@ -34,7 +34,7 @@
         </index>
     </object>
     
-    <object class="wxGtwAnswer" table="wx_gtw_question" extends="xPDOSimpleObject">
+    <object class="wxGtwAnswer" table="wx_gtw_answer" extends="xPDOSimpleObject">
         <field key="answer" dbtype="text" phptype="string" null="false" default=""/>
         <field key="answeredBy" dbtype="varchar" precision="255" phptype="string" null="false" default=""/>
         <field key="wxgtquestion" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
@@ -71,7 +71,7 @@
         <field key="wxgtwpollresponse" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
         <field key="wxgtwregistrant" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
         <aggregate alias="Registrant" class="wxGtwRegistrant" local="wxgtwregistrant" foreign="id" cardinality="one" owner="foreign"/>
-        <aggregate alias="Response" class="wxGtwResponse" local="wxgtwpollresponse" foreign="id" cardinality="one" owner="foreign"/>
+        <aggregate alias="Response" class="wxGtwPollResponse" local="wxgtwpollresponse" foreign="id" cardinality="one" owner="foreign"/>
         <index alias="wxgtwregistrant" name="wxgtwregistrant" primary="false" unique="false" type="BTREE">
             <column key="wxgtwregistrant" length="" collation="A" null="false" />
         </index>
@@ -96,7 +96,7 @@
         <field key="percentageSurveysCompleted" dbtype="varchar" precision="20" phptype="string" null="false" default="" />
         <field key="wxpresentation" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
         <aggregate alias="Presentation" class="wxPresentation" local="wxpresentation" foreign="id" cardinality="one" owner="foreign"/>
-        <composite alias="PollQuestion" class="wxgtwpoll" local="id" foreign="wxgtwsession" cardinality="many" owner="local" />
+        <composite alias="Poll" class="wxGtwPoll" local="id" foreign="wxgtwsession" cardinality="many" owner="local" />
         <composite alias="Registrant" class="wxGtwRegistrant" local="id" foreign="wxgtwsession" cardinality="many" owner="local" />
         <index alias="webinarkey" name="webinarkey" primary="false" unique="false" type="BTREE">
             <column key="webinarkey" length="" collation="A" null="false" />
