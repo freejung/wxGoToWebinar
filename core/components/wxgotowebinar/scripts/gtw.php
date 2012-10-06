@@ -10,7 +10,7 @@ if (!($webinex instanceof Webinex)) return 'could not instantiate Webinex';
 $gtw = $modx->getService('wxgotowebinar','wxGoToWebinar',$modx->getOption('wxgotowebinar.core_path',null,$modx->getOption('core_path').'components/wxgotowebinar/').'model/wxgotowebinar/');
 if (!($gtw instanceof wxGoToWebinar)) return 'could not instantiate wxGoToWebinar';
 
-$presentation = $modx->getObject('wxPresentation',6);
+$presentation = $modx->getObject('wxPresentation',4);
 
 //echo ($gtw->gtwAPI->getAttendeesForAllWebinarSessions(368698758));
 

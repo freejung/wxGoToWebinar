@@ -22,24 +22,21 @@ class wxGtwSession extends xPDOSimpleObject {
     
     /*
     * @param array $questions
-    * @param int $sessionId
     */
-    public function addQuestions ($questions = array(), $sessionId) {
-    	$questionArray = array();
+    public function addQuestions ($questions = array()) {
         foreach($questions as $questionData) {
             $question = $this->xpdo->newObject('wxGtwQuestion');
             $question->fromFullArray($questionData);
             $registrantQuery = $this->xpdo->newQuery('wxGtwRegistrant');
             $registrantQuery->where(array(
-                'wxgtwsession' => $sessionId,
+                'wxgtwsession' => $this->id,
                 'email' => $questionData['askedBy'],
             ));
             $registrant = $this->xpdo->getObject('wxGtwRegistrant', $registrantQuery);
             $question->addOne($registrant);
-            $questionArray[] = $question;
+            $question->save();
         }
-        $this->addMany($questionArray);
-        return $this->save();
+        return true;
     }
 	
 }
