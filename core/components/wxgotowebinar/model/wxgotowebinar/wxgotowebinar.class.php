@@ -68,26 +68,10 @@ class wxGoToWebinar {
     
     public function register ($registrations) {
     	foreach ($registrations as $registration) {
-    		$presentation = $registration->getOne('Presentation');
-    		$webinarKey = str_replace('-', '', $presentation->get('gtwid'));
-    		$sessionQuery = $this->modx->newQuery('wxGtwSession');
-    		$sessionQuery->where(array(
-    			'webinarKey:=' => $webinarKey,
-    			'wxpresentation:=' => $presentation->id,
-    		));
-    		if(!$session = $this->modx->getObject('wxGtwSession', $sessionQuery)) {
-    			$session = $this->modx->newObject('wxGtwSession');
-    			$session->addOne($presentation);
-    			$session->set('webinarKey', $webinarKey);
-    			$session->save();
-    		}
-    		$registrantQuery = $this->modx->newQuery('wxGtwRegistrant');
-    		$registrantQuery->where(array(
-    			'wxgtwsession:=' => $presentation->id,
-    			'wxregistration:=' => $session->id,
-    		));
-    		if(!$registrant = $this->modx->getObject('wxGtwRegistrant', $registrantQuery)) {
-		        $prospect = $registration->getOne('Prospect');
+    		if(!$registrant = $modx->getObject('wxGtwRegistrant', array('wxregistration' => $registration->id))) { 
+	    		$presentation = $registration->getOne('Presentation');
+	    		$webinarKey = str_replace('-', '', $presentation->get('gtwid'));
+	    		$prospect = $registration->getOne('Prospect');
 		        $profile = $prospect->getOne('Profile');
 		        $registrant = $this->modx->newObject('wxGtwRegistrant');
 		        $email = $profile->get('email');
@@ -114,10 +98,8 @@ class wxGoToWebinar {
     /*
     * @param wxPresentation $presentation
     */
-    
     public function getAttendance ($presentation) {
     	set_time_limit(86400);
-    	$ret = '';
         $webinarKey = str_replace('-', '', $presentation->get('gtwid'));
         $response = '';
         //get all sessions for the current webinar presentation
@@ -131,15 +113,9 @@ class wxGoToWebinar {
         }
         $sessionArray = $this->modx->fromJSON($response);
         foreach ($sessionArray as $sessionData) {
-        	
             //get the session object for this session if it exists, otherwise make a new one
             if (!$session = $this->modx->getObject('wxGtwSession',array('sessionKey' => $sessionData['sessionKey']))) {
-            	$sessionQuery = $this->modx->newQuery('wxGtwSession');
-            	$sessionQuery->where(array(
-            		'webinarKey:=' => $webinarKey,
-	    			'wxpresentation:=' => $presentation->id,
-            	));
-            	if(!$session = $this->modx->getObject('wxGtwSession', $sessionQuery)) {
+            	if(!$session = $this->modx->getObject('wxGtwSession', array('webinarKey' => $webinarKey, 'wxpresentation' => $presentation->id))) {
 	    			$session = $this->modx->newObject('wxGtwSession');
 	    			$session->addOne($presentation);
 	    		}
@@ -182,7 +158,6 @@ class wxGoToWebinar {
 	            $sessionSurveys = $this->modx->fromJSON($response);
 	            $session->pollSetup($sessionSurveys, 'survey');
             }
-            
             //get session attendance data
             try
             {
@@ -196,9 +171,7 @@ class wxGoToWebinar {
             foreach ($attArray as $att) {
                 //record attendance for registrants who attended
                 if($att['attendanceTimeInSeconds']) {
-                	
                     if(!$registrant = $this->modx->getObject('wxGtwRegistrant', array('registrantKey' => $att['registrantKey']))) {
-                    	
                     	if(!$prospect = $this->modx->getObject('wxProspect', array('username' => $att['email']))) {
                     		$prospect = $this->modx->newObject('wxProspect');
                     		$prospect->standardSetup($att['email']);
@@ -206,14 +179,11 @@ class wxGoToWebinar {
                     		$profile->set('fullname', $att['firstName'].' '.$att['lastName']);
                     		$prospect->save();
                     	}
-                    	
                     	if(!$registrations = $prospect->getMany('Registration', array('presentation' => $presentation->id))) {
                     		$registrations = $prospect->registerFor(array($presentation));
                     	}
-                    	
                     	$registrant = $this->modx->newObject('wxGtwRegistrant');
                     	$registrant->addOne($registrations[0]);
-                    	
                     }
                     $registrant->fromArray($att);
                     $registrant->addOne($session);
@@ -239,7 +209,6 @@ class wxGoToWebinar {
                     }
                     $surveyAnswers = $this->modx->fromJSON($response);
                     $registrant->addPollAnswers($surveyAnswers, $session->id);
-                    
                 }
             }
             //get session questions and associate them with registrants
@@ -251,12 +220,42 @@ class wxGoToWebinar {
             {
             $this->modx->log(modX::LOG_LEVEL_ERROR, 'wxGTW error: '.$e->getMessage());
             }
-            $ret = $response;
             $sessionQuestions = $this->modx->fromJSON($response);
             $session->addQuestions($sessionQuestions);
-            
         }
-        return $ret;
+        //record non-attendance for registrants who didn't attend
+        $allRegistrations = $this->modx->getIterator('wxRegistration', array('presentation' => $presentation->id));
+        foreach ($allRegistrations as $registration) {
+        	if ($registrants = $this->modx->getCollection('wxGtwRegistrant', array('wxregistration' => $registration->id))) {
+        		foreach($registrants as $registrant) {
+        			$attTime = $registrant->get('attendanceTimeInSeconds');
+        			if (is_null($attTime)) {
+        				$registrant->set('attendanceTimeInSeconds', 0);
+        				$registrant->save();
+        			}
+        		}
+        	}
+        }
+        return true;
+    }
+    
+    /*
+    * Check whether complete attendance has already been recorded for this presentation
+    * Returns false if no session, or if any registrant is missing attendance time
+    *
+    * @param wxPresentation $presentation
+    */
+    
+    public function attendanceExists ($presentation) {
+    	if(!$sessions = $this->modx->getCollection('wxGtwSession', array('wxpresentation' => $presentation->id))) return false;
+    	foreach ($sessions as $session) {
+    		$registrants = $this->modx->getIterator('wxGtwRegistrant', array('wxgtwsession' => $session->id));
+    		foreach ($registrants as $registrant) {
+    			$attTime = $registrant->get('attendanceTimeInSeconds');
+    			if (is_null($attTime)) return false;
+    		}
+    	}
+    	return true;
     }
     
 }

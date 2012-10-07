@@ -25,16 +25,14 @@ class wxGtwSession extends xPDOSimpleObject {
     */
     public function addQuestions ($questions = array()) {
         foreach($questions as $questionData) {
-            $question = $this->xpdo->newObject('wxGtwQuestion');
-            $question->fromFullArray($questionData);
-            $registrantQuery = $this->xpdo->newQuery('wxGtwRegistrant');
-            $registrantQuery->where(array(
-                'wxgtwsession' => $this->id,
-                'email' => $questionData['askedBy'],
-            ));
-            $registrant = $this->xpdo->getObject('wxGtwRegistrant', $registrantQuery);
-            $question->addOne($registrant);
-            $question->save();
+        	if (!$question = $this->xpdo->getObject('wxGtwQuestion', array('question' => $questionData['question']))) {
+	            $question = $this->xpdo->newObject('wxGtwQuestion');
+	            $question->fromFullArray($questionData);
+	            if($registrant = $this->xpdo->getObject('wxGtwRegistrant', array('wxgtwsession' => $this->id, 'email' => $questionData['askedBy']))) {
+		            $question->addOne($registrant);
+		            $question->save();
+		        } 
+            }
         }
         return true;
     }

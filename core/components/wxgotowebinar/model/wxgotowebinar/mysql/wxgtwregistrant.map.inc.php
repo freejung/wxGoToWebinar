@@ -57,8 +57,7 @@ $xpdo_meta_map['wxGtwRegistrant']= array (
       'precision' => '10',
       'attributes' => 'unsigned',
       'phptype' => 'integer',
-      'null' => false,
-      'default' => 0,
+      'null' => true,
     ),
     'wxgtwsession' => 
     array (
