@@ -171,20 +171,24 @@ class wxGoToWebinar {
             foreach ($attArray as $att) {
                 //record attendance for registrants who attended
                 if($att['attendanceTimeInSeconds']) {
-                    if(!$registrant = $this->modx->getObject('wxGtwRegistrant', array('registrantKey' => $att['registrantKey']))) {
-                    	if(!$prospect = $this->modx->getObject('wxProspect', array('username' => $att['email']))) {
-                    		$prospect = $this->modx->newObject('wxProspect');
-                    		$prospect->standardSetup($att['email']);
-                    		$profile = $prospect->getOne('Profile');
-                    		$profile->set('fullname', $att['firstName'].' '.$att['lastName']);
-                    		$prospect->save();
-                    	}
-                    	if(!$registrations = $prospect->getMany('Registration', array('presentation' => $presentation->id))) {
-                    		$registrations = $prospect->registerFor(array($presentation));
-                    	}
+                	if(!$prospect = $this->modx->getObject('wxProspect', array('username' => $att['email']))) {
+                		$prospect = $this->modx->newObject('wxProspect');
+                		$prospect->standardSetup($att['email']);
+                		$profile = $prospect->getOne('Profile');
+                		$profile->set('fullname', $att['firstName'].' '.$att['lastName']);
+                		$prospect->save();
+                	}
+                	$this->modx->log(modX::LOG_LEVEL_ERROR,'prospect:'.$prospect->id);
+                	if(!$registrations = $prospect->getMany('Registration', array('presentation' => $presentation->id))) {
+                		$registrations = $prospect->registerFor(array($presentation));
+                	}
+					if(!$registrant = $this->modx->getObject('wxGtwRegistrant', array('registrantKey' => $att['registrantKey']))) {
                     	$registrant = $this->modx->newObject('wxGtwRegistrant');
-                    	$registrant->addOne($registrations[0]);
-                    }
+                	}
+                	foreach($registrations as $registration){
+	                	$this->modx->log(modX::LOG_LEVEL_ERROR,'registration:'.$registration->id);
+						$registrant->addOne($registration);
+					}
                     $registrant->fromArray($att);
                     $registrant->addOne($session);
                     $registrant->save();
@@ -223,17 +227,22 @@ class wxGoToWebinar {
             $sessionQuestions = $this->modx->fromJSON($response);
             $session->addQuestions($sessionQuestions);
         }
-        //record non-attendance for registrants who didn't attend
+        //record non-attendance for registrants who didn't attend, set registration field 'attended' according to attendance
         $allRegistrations = $this->modx->getIterator('wxRegistration', array('presentation' => $presentation->id));
         foreach ($allRegistrations as $registration) {
+        	$attended = 0;
         	if ($registrants = $this->modx->getCollection('wxGtwRegistrant', array('wxregistration' => $registration->id))) {
         		foreach($registrants as $registrant) {
         			$attTime = $registrant->get('attendanceTimeInSeconds');
         			if (is_null($attTime)) {
         				$registrant->set('attendanceTimeInSeconds', 0);
         				$registrant->save();
+        			}elseif($attTime > 0) {
+        				$attended = 1;
         			}
         		}
+        		$registration->set('attended',$attended);
+        		$registration->save();
         	}
         }
         return true;
