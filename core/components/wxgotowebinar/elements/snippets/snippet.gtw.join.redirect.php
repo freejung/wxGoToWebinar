@@ -63,7 +63,7 @@ if($join) {
 					if($registrations = $modx->getCollection('wxRegistration', $c)) {
 						$joinUrl = '';
 						foreach($registrations as $registration) {
-							if ($registrant = $modx->getObject('wxGtwRegistrant', array('wxregistration' => $registration->id)) {
+							if ($registrant = $modx->getObject('wxGtwRegistrant', array('wxregistration' => $registration->id))) {
 								$joinUrl = $registrant->get('joinUrl');
 							}
 						}

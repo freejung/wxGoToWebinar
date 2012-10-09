@@ -68,7 +68,7 @@ class wxGoToWebinar {
     
     public function register ($registrations) {
     	foreach ($registrations as $registration) {
-    		if(!$registrant = $modx->getObject('wxGtwRegistrant', array('wxregistration' => $registration->id))) { 
+    		if(!$registrant = $this->modx->getObject('wxGtwRegistrant', array('wxregistration' => $registration->id))) { 
 	    		$presentation = $registration->getOne('Presentation');
 	    		$webinarKey = str_replace('-', '', $presentation->get('gtwid'));
 	    		$prospect = $registration->getOne('Prospect');
