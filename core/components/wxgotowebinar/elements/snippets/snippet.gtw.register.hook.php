@@ -25,6 +25,10 @@
  * @subpackage snippets
  */
 if(!$hook) return FALSE;
+
+$gtw = $modx->getService('wxgotowebinar','wxGoToWebinar',$modx->getOption('wxgotowebinar.core_path',null,$modx->getOption('core_path').'components/wxgotowebinar/').'model/wxgotowebinar/');
+if (!($gtw instanceof wxGoToWebinar)) return 'could not instantiate wxGoToWebinar';
+
 $email = $hook->getValue('emailAddress');
 if(empty($email)) return FALSE;
 $existingUser = FALSE;

@@ -178,16 +178,16 @@ class wxGoToWebinar {
                 		$profile->set('fullname', $att['firstName'].' '.$att['lastName']);
                 		$prospect->save();
                 	}
-                	$this->modx->log(modX::LOG_LEVEL_ERROR,'prospect:'.$prospect->id);
                 	if(!$registrations = $prospect->getMany('Registration', array('presentation' => $presentation->id))) {
                 		$registrations = $prospect->registerFor(array($presentation));
                 	}
 					if(!$registrant = $this->modx->getObject('wxGtwRegistrant', array('registrantKey' => $att['registrantKey']))) {
                     	$registrant = $this->modx->newObject('wxGtwRegistrant');
                 	}
-                	foreach($registrations as $registration){
-	                	$this->modx->log(modX::LOG_LEVEL_ERROR,'registration:'.$registration->id);
-						$registrant->addOne($registration);
+                	if(!$registration = $registrant->getOne('Registration')) {
+	                	foreach($registrations as $registration){
+							$registrant->addOne($registration);
+						}
 					}
                     $registrant->fromArray($att);
                     $registrant->addOne($session);
