@@ -258,13 +258,31 @@ class wxGoToWebinar {
     public function attendanceExists ($presentation) {
     	if(!$sessions = $this->modx->getCollection('wxGtwSession', array('wxpresentation' => $presentation->id))) return false;
     	foreach ($sessions as $session) {
-    		$registrants = $this->modx->getIterator('wxGtwRegistrant', array('wxgtwsession' => $session->id));
+    		$registrants = $this->modx->getMany('wxGtwRegistrant', array('wxgtwsession' => $session->id));
     		foreach ($registrants as $registrant) {
     			$attTime = $registrant->get('attendanceTimeInSeconds');
     			if (is_null($attTime)) return false;
     		}
     	}
     	return true;
+    }
+    
+    /*
+    * output attendance data from the database as a flat array
+    *
+    * @param wxPresentation $presentation
+    */
+    
+    public function attendanceData {$presentation) {
+    	$attData = array()
+    	if(!$sessions = $this->modx->getCollection('wxGtwSession', array('wxpresentation' => $presentation->id))) return false;
+    	foreach ($sessions as $session) {
+    		$registrants = $this->modx->getMany('wxGtwRegistrant', array('wxgtwsession' => $session->id));
+    		foreach ($registrants as $registrant) {
+    			$attData[$registrant->get('email')] = $registrant->toFlatArray();
+    		}
+    	}
+    	return $attData;
     }
     
 }
