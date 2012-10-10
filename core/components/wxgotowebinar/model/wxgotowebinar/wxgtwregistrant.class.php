@@ -29,6 +29,7 @@ class wxGtwRegistrant extends xPDOSimpleObject {
     /*
     * output a flat associative array containing data from the registrant and associated objects
     */
+    
     public function toFlatArray () {
     	$registrantArray = $this->toArray();
     	$session = $this->getOne('Session');

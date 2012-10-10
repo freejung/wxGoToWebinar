@@ -273,11 +273,11 @@ class wxGoToWebinar {
     * @param wxPresentation $presentation
     */
     
-    public function attendanceData {$presentation) {
-    	$attData = array()
+    public function attendanceData ($presentation) {
+    	$attData = array();
     	if(!$sessions = $this->modx->getCollection('wxGtwSession', array('wxpresentation' => $presentation->id))) return false;
     	foreach ($sessions as $session) {
-    		$registrants = $this->modx->getMany('wxGtwRegistrant', array('wxgtwsession' => $session->id));
+    		$registrants = $this->modx->getCollection('wxGtwRegistrant', array('wxgtwsession' => $session->id));
     		foreach ($registrants as $registrant) {
     			$attData[$registrant->get('email')] = $registrant->toFlatArray();
     		}
