@@ -38,9 +38,14 @@
         <field key="answer" dbtype="text" phptype="string" null="false" default=""/>
         <field key="answeredBy" dbtype="varchar" precision="255" phptype="string" null="false" default=""/>
         <field key="wxgtwquestion" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
+        <field key="presenter" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
         <aggregate alias="Question" class="wxGtwQuestion" local="wxgtwquestion" foreign="id" cardinality="one" owner="foreign"/>
+        <aggregate alias="Presenter" class="wxPresenter" local="presenter" foreign="id" cardinality="one" owner="foreign"/>
         <index alias="wxgtwquestion" name="wxgtwquestion" primary="false" unique="false" type="BTREE">
             <column key="wxgtwquestion" length="" collation="A" null="false" />
+        </index>
+        <index alias="Presenter" name="presenter" primary="false" unique="false" type="BTREE">
+            <column key="presenter" length="" collation="A" null="false" />
         </index>
     </object>
     
