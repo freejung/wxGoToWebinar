@@ -225,6 +225,7 @@ class wxGoToWebinar {
             $this->modx->log(modX::LOG_LEVEL_ERROR, 'wxGTW error: '.$e->getMessage());
             }
             $sessionQuestions = $this->modx->fromJSON($response);
+            $this->modx->log(modX::LOG_LEVEL_ERROR, 'session questions: '.$response);
             $session->addQuestions($sessionQuestions);
         }
         //record non-attendance for registrants who didn't attend, set registration field 'attended' according to attendance
@@ -234,12 +235,25 @@ class wxGoToWebinar {
         	if ($registrants = $this->modx->getCollection('wxGtwRegistrant', array('wxregistration' => $registration->id))) {
         		foreach($registrants as $registrant) {
         			$attTime = $registrant->get('attendanceTimeInSeconds');
+        			$email = $registrant->get('email');
         			if (is_null($attTime)) {
         				$registrant->set('attendanceTimeInSeconds', 0);
-        				$registrant->save();
+        				
         			}elseif($attTime > 0) {
         				$attended = 1;
         			}
+        			if(empty($email)) {
+        				if($prospect = $registration->getOne('Prospect')){
+	        				if($profile = $prospect->getOne('Profile')) {
+		        				$registrant->set('email', $profile->get('email'));
+		        			}
+        				}
+        			}
+        			// if registrant has no session, associate it with the last session
+        			if(!$registrant->getOne('Session')) {
+        				if(is_object($session)) $registrant->addOne($session);
+        			}
+        			$registrant->save();
         		}
         		$registration->set('attended',$attended);
         		$registration->save();
@@ -258,7 +272,7 @@ class wxGoToWebinar {
     public function attendanceExists ($presentation) {
     	if(!$sessions = $this->modx->getCollection('wxGtwSession', array('wxpresentation' => $presentation->id))) return false;
     	foreach ($sessions as $session) {
-    		$registrants = $this->modx->getMany('wxGtwRegistrant', array('wxgtwsession' => $session->id));
+    		$registrants = $this->modx->getCollection('wxGtwRegistrant', array('wxgtwsession' => $session->id));
     		foreach ($registrants as $registrant) {
     			$attTime = $registrant->get('attendanceTimeInSeconds');
     			if (is_null($attTime)) return false;

@@ -28,7 +28,7 @@
         <field key="question" dbtype="text" phptype="string" null="false" default=""/>
         <field key="wxgtwregistrant" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
         <aggregate alias="Registrant" class="wxGtwRegistrant" local="wxgtwregistrant" foreign="id" cardinality="one" owner="foreign"/>
-        <composite alias="Answer" class="wxGtwAnswer" local="id" foreign="wxgtquestion" cardinality="many" owner="local" />
+        <composite alias="Answer" class="wxGtwAnswer" local="id" foreign="wxgtwquestion" cardinality="many" owner="local" />
         <index alias="wxgtwregistrant" name="wxgtwregistrant" primary="false" unique="false" type="BTREE">
             <column key="wxgtwregistrant" length="" collation="A" null="false" />
         </index>
@@ -37,10 +37,10 @@
     <object class="wxGtwAnswer" table="wx_gtw_answer" extends="xPDOSimpleObject">
         <field key="answer" dbtype="text" phptype="string" null="false" default=""/>
         <field key="answeredBy" dbtype="varchar" precision="255" phptype="string" null="false" default=""/>
-        <field key="wxgtquestion" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
-        <aggregate alias="Question" class="wxGtwQuestion" local="wxgtquestion" foreign="id" cardinality="one" owner="foreign"/>
-        <index alias="wxgtquestion" name="wxgtquestion" primary="false" unique="false" type="BTREE">
-            <column key="wxgtquestion" length="" collation="A" null="false" />
+        <field key="wxgtwquestion" dbtype="int" precision="10" attributes="unsigned" phptype="integer" null="false" default="0"/>
+        <aggregate alias="Question" class="wxGtwQuestion" local="wxgtwquestion" foreign="id" cardinality="one" owner="foreign"/>
+        <index alias="wxgtwquestion" name="wxgtwquestion" primary="false" unique="false" type="BTREE">
+            <column key="wxgtwquestion" length="" collation="A" null="false" />
         </index>
     </object>
     

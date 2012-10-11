@@ -56,7 +56,7 @@ $xpdo_meta_map['wxGtwQuestion']= array (
     array (
       'class' => 'wxGtwAnswer',
       'local' => 'id',
-      'foreign' => 'wxgtquestion',
+      'foreign' => 'wxgtwquestion',
       'cardinality' => 'many',
       'owner' => 'local',
     ),

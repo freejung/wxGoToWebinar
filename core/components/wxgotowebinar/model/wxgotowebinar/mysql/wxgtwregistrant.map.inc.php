@@ -13,7 +13,7 @@ $xpdo_meta_map['wxGtwRegistrant']= array (
     'status' => '',
     'joinUrl' => '',
     'email' => '',
-    'attendanceTimeInSeconds' => 0,
+    'attendanceTimeInSeconds' => NULL,
     'wxgtwsession' => 0,
     'wxregistration' => 0,
   ),

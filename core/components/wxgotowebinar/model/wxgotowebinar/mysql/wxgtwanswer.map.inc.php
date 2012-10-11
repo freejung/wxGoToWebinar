@@ -5,13 +5,13 @@
 $xpdo_meta_map['wxGtwAnswer']= array (
   'package' => 'wxgotowebinar',
   'version' => '1.1',
-  'table' => 'wx_gtw_question',
+  'table' => 'wx_gtw_answer',
   'extends' => 'xPDOSimpleObject',
   'fields' => 
   array (
     'answer' => '',
     'answeredBy' => '',
-    'wxgtquestion' => 0,
+    'wxgtwquestion' => 0,
   ),
   'fieldMeta' => 
   array (
@@ -30,7 +30,7 @@ $xpdo_meta_map['wxGtwAnswer']= array (
       'null' => false,
       'default' => '',
     ),
-    'wxgtquestion' => 
+    'wxgtwquestion' => 
     array (
       'dbtype' => 'int',
       'precision' => '10',
@@ -42,15 +42,15 @@ $xpdo_meta_map['wxGtwAnswer']= array (
   ),
   'indexes' => 
   array (
-    'wxgtquestion' => 
+    'wxgtwquestion' => 
     array (
-      'alias' => 'wxgtquestion',
+      'alias' => 'wxgtwquestion',
       'primary' => false,
       'unique' => false,
       'type' => 'BTREE',
       'columns' => 
       array (
-        'wxgtquestion' => 
+        'wxgtwquestion' => 
         array (
           'length' => '',
           'collation' => 'A',
@@ -64,7 +64,7 @@ $xpdo_meta_map['wxGtwAnswer']= array (
     'Question' => 
     array (
       'class' => 'wxGtwQuestion',
-      'local' => 'wxgtquestion',
+      'local' => 'wxgtwquestion',
       'foreign' => 'id',
       'cardinality' => 'one',
       'owner' => 'foreign',
