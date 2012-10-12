@@ -225,7 +225,6 @@ class wxGoToWebinar {
             $this->modx->log(modX::LOG_LEVEL_ERROR, 'wxGTW error: '.$e->getMessage());
             }
             $sessionQuestions = $this->modx->fromJSON($response);
-            $this->modx->log(modX::LOG_LEVEL_ERROR, 'session questions: '.$response);
             $session->addQuestions($sessionQuestions);
         }
         //record non-attendance for registrants who didn't attend, set registration field 'attended' according to attendance
