@@ -256,19 +256,6 @@ class wxGoToWebinar {
         		}
         		$registration->set('attended',$attended);
         		$registration->save();
-        	}else{
-        		$registrant = $this->modx->newObject('wxGtwRegistrant');
-        		$registrant->addOne($registration);
-        		$registrant->set('attendanceTimeInSeconds', 0);
-        		if($prospect = $registration->getOne('Prospect')){
-    				if($profile = $prospect->getOne('Profile')) {
-        				$registrant->set('email', $profile->get('email'));
-        			}
-				}
-				if(is_object($session)) $registrant->addOne($session);
-				$registrant->save();
-				$registration->set('attended',0);
-        		$registration->save();
         	}
         }
         return true;
@@ -305,7 +292,7 @@ class wxGoToWebinar {
     	foreach ($sessions as $session) {
     		$registrants = $this->modx->getCollection('wxGtwRegistrant', array('wxgtwsession' => $session->id));
     		foreach ($registrants as $registrant) {
-    			$attData[strtolower($registrant->get('email'))] = $registrant->toFlatArray();
+    			$attData[$registrant->get('email')] = $registrant->toFlatArray();
     		}
     	}
     	return $attData;

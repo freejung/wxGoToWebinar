@@ -38,6 +38,7 @@ class wxGtwRegistrant extends xPDOSimpleObject {
     	$pollAnswersArray = array();
     	$registrantArray = $this->toArray();
     	if($registrantArray['attendanceTimeInSeconds'] > 0) $registrantArray['attendanceTimeInMinutes'] = round($registrantArray['attendanceTimeInSeconds']/60);
+    	if($registrantArray['email']) $registrantArray['email'] = strtolower($registrantArray['email']);
     	if($session = $this->getOne('Session')){
 	    	$sessionArray = $session->toArray('ses.');
 	    }
