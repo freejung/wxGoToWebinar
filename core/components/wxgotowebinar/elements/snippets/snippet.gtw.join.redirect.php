@@ -55,7 +55,6 @@ if($join) {
 			if($presentation->get('recording')) return '';
 			if($email) {
 				if($prospect = $modx->getObject('wxProspect', array('username' => $email))) {
-					//echo('<br><br>prospect id ='.$prospect->get('id'));
 					$c = $modx->newQuery('wxRegistration');
 					//echo('<br>presentation id='.$presentation->get('id'));
 					$whereArray = array('prospect' => $prospect->get('id'), 'presentation' => $presentation->get('id'));
