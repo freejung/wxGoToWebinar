@@ -27,6 +27,7 @@
 
 $prospectId = $modx->getOption('prospectId',$scriptProperties,0);
 $presentationId = $modx->getOption('presentationId',$scriptProperties,0);
+$getWebinarData = $modx->getOption('getWebinarData',$scriptProperties,0);
 $tpl = $modx->getOption('tpl',$scriptProperties,'');
 $registrantTpl = $modx->getOption('registrantTpl',$scriptProperties,'');
 $getQuestions = $modx->getOption('getQuestions',$scriptProperties,0);
@@ -46,6 +47,11 @@ if($prospectId) {
     $webinex = $modx->getService('webinex','Webinex',$modx->getOption('webinex.core_path',null,$modx->getOption('core_path').'components/webinex/').'model/webinex/',$scriptProperties);
     if (!($webinex instanceof Webinex)) return 'could not instantiate Webinex';
     if($prospect = $modx->getObject('wxProspect',$prospectId)){
+    	if($getWebinarData) {
+    		if($presentation = $modx->getObject('wxPresentation',$presentationId)) {
+    			$presentationArray = $presentation->toFullArray();
+    		}
+    	}
         if($registrations = $prospect->getMany('Registration',array('presentation' => $presentationId))){
             $registered = 1;
             foreach ($registrations as $registration) {
@@ -99,6 +105,7 @@ if($prospectId) {
                         $registrantArray['attendanceHours'] = $hours;
                         $registrantArray['attendanceMinutes'] = $minutes;
                         $registrantArray['attendanceSeconds'] = $seconds;
+                        if($getWebinarData) $registrantArray = array_merge($presentationArray, $registrantArray);
                         if($thisRegistrant = $modx->getChunk($registrantTpl, $registrantArray)){
                             $registrantText .= $thisRegistrant;
                         }
@@ -106,7 +113,9 @@ if($prospectId) {
                 }
             }
         }
-        $output = $modx->getChunk($tpl, array('registered' => $registered, 'registrantText' => $registrantText, 'presentationId' => $presentationId, 'default' => $default));
+        $outputArray = array('registered' => $registered, 'registrantText' => $registrantText, 'presentationId' => $presentationId, 'default' => $default);
+        if($getWebinarData) $outputArray = array_merge($presentationArray, $outputArray);
+        $output = $modx->getChunk($tpl, $outputArray);
     }
 }else{
     $output = $default;
